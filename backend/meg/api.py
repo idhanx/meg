@@ -51,6 +51,16 @@ def create_app(service: MegService | None = None) -> FastAPI:
             raise HTTPException(404, "Procedure not found")
         return result
 
+    @app.get("/graph")
+    def graph(tenant_id: str) -> dict[str, list]:
+        result = get_service().store.graph_for(tenant_id).query("MATCH (n) OPTIONAL MATCH (n)-[r]->(m) RETURN n.id, labels(n), type(r), m.id")
+        nodes, links = {}, []
+        for row in list(getattr(result, "result_set", result or [])):
+            node_id, labels, edge, target = row
+            nodes[node_id] = {"id": node_id, "label": labels[0] if labels else "Node"}
+            if edge and target: links.append({"source": node_id, "target": target, "label": edge})
+        return {"nodes": list(nodes.values()), "links": links}
+
     return app
 
 

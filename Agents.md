@@ -9,7 +9,7 @@ You are building **meg** for the WeMakeDevs x FalkorDB hackathon (Graph Hacks), 
 - [x] M3 Recall
 - [x] M4 API + MCP
 - [x] M5 Governance
-- [ ] M6 UI
+- [x] M6 UI
 - [ ] M7 Benchmark + demo
 - [ ] M8 Ship
 
