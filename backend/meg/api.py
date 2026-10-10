@@ -9,6 +9,7 @@ from pydantic import BaseModel, Field
 
 from meg.db import FalkorStore
 from meg.service import MegService
+from meg.graphql_api import router as graphql_router
 
 
 class RecallRequest(BaseModel):
@@ -34,6 +35,8 @@ def create_app(service: MegService | None = None) -> FastAPI:
         if app.state.service is None:
             app.state.service = MegService(FalkorStore())
         return app.state.service
+
+    app.include_router(graphql_router(get_service),prefix="/graphql")
 
     @app.get("/health")
     def health() -> dict[str, str]:

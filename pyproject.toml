@@ -7,7 +7,7 @@ name = "meg"
 version = "0.1.0"
 description = "Governed procedural memory for coding agents, backed by FalkorDB."
 requires-python = ">=3.11"
-dependencies = ["fastapi>=0.115", "uvicorn[standard]>=0.30", "pydantic>=2.7", "pydantic-settings>=2.2", "falkordb>=1.0", "mcp>=1.0"]
+dependencies = ["fastapi>=0.115", "uvicorn[standard]>=0.30", "pydantic>=2.7", "pydantic-settings>=2.2", "falkordb>=1.0", "mcp>=1.0", "strawberry-graphql[fastapi]>=0.288"]
 
 [project.optional-dependencies]
 embeddings = ["sentence-transformers>=3.0"]
