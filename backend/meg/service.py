@@ -3,6 +3,8 @@
 from __future__ import annotations
 
 from typing import Any
+import json
+from pathlib import Path
 
 from meg.db import FalkorStore
 from meg.governance.audit import audit
@@ -38,7 +40,13 @@ class MegService:
                         {"id": f"denied:{trace.agent.id}:{trace.task}", "sensitivity": trace.sensitivity.value, "agent": trace.agent.id,
                          "reason": reason, "ts": "", "query": trace.task})
             raise PermissionError(reason)
-        return record_trace(graph, trace)
+        result = record_trace(graph, trace)
+        vector = embed(trace.task)
+        if result.procedure_id and vector:
+            # FalkorDB stores embeddings as vecf32, enabling the vector index in recall.
+            graph.query("MATCH (p:Procedure {id:$id})-[:SOLVES]->(t:Task) SET p.embedding=vecf32($embedding), t.embedding=vecf32($embedding)",
+                        {"id": result.procedure_id, "embedding": vector})
+        return result
 
     def recall(self, tenant_id: str, agent_id: str, task: str, k: int = 3) -> list[dict[str, Any]]:
         graph = self.store.graph_for(tenant_id)
@@ -65,3 +73,14 @@ class MegService:
         row = rows[0]
         values = row if isinstance(row, dict) else {"procedure_id": row[0], "title": row[1], "summary": row[2], "success_count": row[3], "fail_count": row[4], "recorded_by": row[5]}
         return values
+
+    def audit_log(self, tenant_id: str, decision: str | None = None) -> list[dict[str, Any]]:
+        query = "MATCH (a:Agent)-[r:ACCESSED]->(p:Procedure) WHERE $decision IS NULL OR r.decision=$decision RETURN a.id, p.id, r.action, r.decision, r.reason, r.ts, r.query ORDER BY r.ts DESC"
+        rows = list(getattr(self.store.graph_for(tenant_id).query(query, {"decision": decision}), "result_set", []))
+        return [{"agent_id": r[0], "procedure_id": r[1], "action": r[2], "decision": r[3], "reason": r[4], "ts": r[5], "query": r[6]} for r in rows]
+
+    def policies(self, tenant_id: str) -> list[dict[str, str]]:
+        return policies_for(self.store.graph_for(tenant_id))
+
+    def benchmark(self) -> dict[str, Any]:
+        return json.loads((Path(__file__).parents[2] / "bench/results/latest.json").read_text())

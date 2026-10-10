@@ -61,6 +61,18 @@ def create_app(service: MegService | None = None) -> FastAPI:
             if edge and target: links.append({"source": node_id, "target": target, "label": edge})
         return {"nodes": list(nodes.values()), "links": links}
 
+    @app.get("/audit")
+    def audit(tenant_id: str, decision: str | None = None) -> dict[str, Any]:
+        return {"entries": get_service().audit_log(tenant_id, decision)}
+
+    @app.get("/policies")
+    def policies(tenant_id: str) -> dict[str, Any]:
+        return {"policies": get_service().policies(tenant_id)}
+
+    @app.get("/bench/results")
+    def bench_results() -> dict[str, Any]:
+        return get_service().benchmark()
+
     return app
 
 

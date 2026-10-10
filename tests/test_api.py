@@ -13,6 +13,9 @@ class Service:
 
     def explain(self, tenant_id, procedure_id):
         return {"procedure_id": procedure_id}
+    def audit_log(self, tenant_id, decision=None): return []
+    def policies(self, tenant_id): return []
+    def benchmark(self): return {"method":"simulated"}
 
 
 def test_rest_api_delegates_to_shared_service() -> None:
@@ -20,3 +23,5 @@ def test_rest_api_delegates_to_shared_service() -> None:
     assert client.get("/health").json() == {"status": "ok"}
     assert client.post("/recall", json={"tenant_id": "demo", "agent_id": "a", "task": "ci"}).json()["procedures"][0]["procedure_id"] == "p1"
     assert client.post("/record", json={}).json()["procedure_id"] == "p1"
+    assert client.get("/audit?tenant_id=demo").json() == {"entries": []}
+    assert client.get("/bench/results").json()["method"] == "simulated"
