@@ -6,3 +6,9 @@ show its highlighted graph path. Use a readonly agent to demonstrate a denied
 restricted procedure and its audit edge.
 
 MCP stdio registration: `uv run python -m meg.mcp_server`.
+
+## Reviewer loop
+
+Run `python scripts/demo_loop.py` to show a supported tool-routing proposal
+passing deterministic gates and replay, followed by a bad no-verification
+candidate being rejected by a pinned golden task.

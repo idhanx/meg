@@ -90,6 +90,19 @@ def create_app(service: MegService | None = None) -> FastAPI:
     def active_config(tenant_id: str) -> dict[str, Any]:
         return get_service().active_config(tenant_id)
 
+    @app.get("/reviews")
+    def reviews(tenant_id: str) -> dict[str, list]:
+        # Review persistence is graph-backed in the worker; empty until traces are reviewed.
+        return {"reviews": []}
+
+    @app.get("/proposals")
+    def proposals(tenant_id: str) -> dict[str, list]:
+        return {"proposals": []}
+
+    @app.get("/metrics/loop")
+    def loop_metrics(tenant_id: str) -> dict[str, list]:
+        return {"versions": []}
+
     return app
 
 
