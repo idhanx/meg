@@ -96,7 +96,7 @@ def create_app(service: MegService | None = None) -> FastAPI:
 
     @app.get("/proposals")
     def proposals(tenant_id: str) -> dict[str, list]:
-        return {"proposals": []}
+        return {"proposals": get_service().proposals(tenant_id)}
 
     @app.get("/metrics/loop")
     def loop_metrics(tenant_id: str) -> dict[str, list]:

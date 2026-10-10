@@ -16,6 +16,7 @@ from meg.recall.embed import embed
 from meg.recall.rank import rank
 from meg.recall.search import candidates
 from meg.review.worker import ReviewWorker
+from meg.gate.proposals import ProposalStore
 from uuid import uuid4
 from meg.schema import ensure_schema
 
@@ -105,3 +106,5 @@ class MegService:
     def reviews(self,tenant_id:str)->list[dict[str,Any]]:
         rows=list(getattr(self.store.graph_for(tenant_id).query("MATCH (r:Reviewer)-[:WROTE]->(v:Review)-[:GRADES]->(t:Trace) RETURN v.id,r.id,t.id,v.scores,v.overall,v.verdict ORDER BY v.created_at DESC"),"result_set",[]))
         return [{"id":x[0],"reviewer_id":x[1],"trace_id":x[2],"scores":json.loads(x[3]),"overall":x[4],"verdict":x[5]} for x in rows]
+    def proposals(self,tenant_id:str)->list[dict[str,Any]]:
+        return ProposalStore(self.store.graph_for(tenant_id)).list()

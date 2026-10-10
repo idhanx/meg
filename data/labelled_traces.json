@@ -1,0 +1,1 @@
+[{"id":"verified","events":[{"id":"e1","type":"command","exit_code":0}],"verdict":"pass"},{"id":"missing-verification","events":[{"id":"e1","type":"edit"}],"verdict":"needs_review"}]
