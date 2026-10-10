@@ -5,6 +5,8 @@ from __future__ import annotations
 from typing import Any
 
 from meg.db import FalkorStore
+from meg.governance.audit import audit
+from meg.governance.policy import allowed, policies_for, seed_defaults
 from meg.ingest.merge import RecordResult, record_trace
 from meg.ingest.parser import parse_trace
 from meg.recall.embed import embed
@@ -15,7 +17,9 @@ from meg.schema import ensure_schema
 
 def initialize_tenant(store: FalkorStore, tenant_id: str) -> None:
     """Select a tenant graph and ensure its schema exists."""
-    ensure_schema(store.graph_for(tenant_id))
+    graph = store.graph_for(tenant_id)
+    ensure_schema(graph)
+    seed_defaults(graph)
 
 
 class MegService:
@@ -25,12 +29,31 @@ class MegService:
     def record(self, payload: dict[str, Any]) -> RecordResult:
         trace = parse_trace(payload)
         initialize_tenant(self.store, trace.tenant_id)
-        return record_trace(self.store.graph_for(trace.tenant_id), trace)
+        graph = self.store.graph_for(trace.tenant_id)
+        granted, reason = allowed(trace.agent.role, "write", trace.sensitivity.value, policies_for(graph))
+        if not granted:
+            # There is no Procedure to attach before a denied creation; audit uses a request placeholder node.
+            graph.query("MERGE (p:Procedure {id:$id}) ON CREATE SET p.title='Denied write request', p.sensitivity=$sensitivity "
+                        "MERGE (a:Agent {id:$agent}) CREATE (a)-[:ACCESSED {action:'write',decision:'denied',reason:$reason,ts:$ts,query:$query}]->(p)",
+                        {"id": f"denied:{trace.agent.id}:{trace.task}", "sensitivity": trace.sensitivity.value, "agent": trace.agent.id,
+                         "reason": reason, "ts": "", "query": trace.task})
+            raise PermissionError(reason)
+        return record_trace(graph, trace)
 
     def recall(self, tenant_id: str, agent_id: str, task: str, k: int = 3) -> list[dict[str, Any]]:
         graph = self.store.graph_for(tenant_id)
-        results = candidates(graph, task, embed(task), limit=10)
-        return rank(results, task, k)
+        result_rows = candidates(graph, task, embed(task), limit=10)
+        role_result = graph.query("MATCH (a:Agent {id:$id}) RETURN a.role", {"id": agent_id})
+        role_rows = list(getattr(role_result, "result_set", role_result or []))
+        role = (role_rows[0][0] if role_rows and not isinstance(role_rows[0], dict) else (role_rows[0].get("role") if role_rows else "readonly"))
+        policies = policies_for(graph)
+        visible = []
+        for candidate in result_rows:
+            granted, reason = allowed(role, "read", candidate.get("sensitivity", "internal"), policies)
+            audit(graph, agent_id, candidate["id"], "read", "allowed" if granted else "denied", reason, task)
+            if granted:
+                visible.append(candidate)
+        return rank(visible, task, k)
 
     def explain(self, tenant_id: str, procedure_id: str) -> dict[str, Any] | None:
         result = self.store.graph_for(tenant_id).query(

@@ -33,7 +33,10 @@ def create_app(service: MegService | None = None) -> FastAPI:
 
     @app.post("/record")
     def record(payload: dict[str, Any]) -> dict[str, Any]:
-        result = get_service().record(payload)
+        try:
+            result = get_service().record(payload)
+        except PermissionError as error:
+            raise HTTPException(403, str(error)) from error
         return {"procedure_id": result.procedure_id, "merged_into": result.merged_into,
                 "new_steps": result.new_steps, "reused_steps": result.reused_steps}
 
