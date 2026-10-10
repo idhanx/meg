@@ -21,7 +21,7 @@ SCHEMA_QUERIES = (
 
 def _already_exists(error: Exception) -> bool:
     message = str(error).lower()
-    return "already exists" in message or "index exists" in message
+    return "already exists" in message or "index exists" in message or "already indexed" in message
 
 
 def ensure_schema(graph: Graph) -> None:

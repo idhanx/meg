@@ -10,3 +10,10 @@ statements, so `ensure_schema` treats an existing-index response as successful.
 
 Vector values will be stored using `vecf32(...)`, and recall will query them via
 `db.idx.vector.queryNodes` in M3.
+
+## FalkorDB write compatibility
+
+The server rejects `MATCH` inside `FOREACH`. Prefix-parent links are therefore
+created through `UNWIND` plus `OPTIONAL MATCH` and a conditional `FOREACH`.
+Its idempotent-index response is also `Attribute 'id' is already indexed`, which
+is treated as a successful existing-index response by `ensure_schema`.

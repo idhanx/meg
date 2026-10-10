@@ -91,8 +91,10 @@ FOREACH (command IN CASE WHEN $verify_command IS NULL THEN [] ELSE [$verify_comm
   MERGE (c:Command {text: command}) ON CREATE SET c.expected_exit = 0
   MERGE (p)-[:VERIFIED_BY]->(c))
 WITH p
-FOREACH (parent_id IN $parents |
-  MATCH (parent:Procedure {id: parent_id}) MERGE (p)-[:BUILDS_ON]->(parent))
+UNWIND CASE WHEN size($parents) = 0 THEN [NULL] ELSE $parents END AS parent_id
+OPTIONAL MATCH (parent:Procedure {id: parent_id})
+FOREACH (ignored IN CASE WHEN parent IS NULL THEN [] ELSE [1] END |
+  MERGE (p)-[:BUILDS_ON]->(parent))
 RETURN p.id AS procedure_id
 """
 
