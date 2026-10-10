@@ -16,6 +16,7 @@ class Service:
     def audit_log(self, tenant_id, decision=None): return []
     def policies(self, tenant_id): return []
     def benchmark(self): return {"method":"simulated"}
+    def active_config(self, tenant_id): return {"version":1,"body":{},"hash":"x"}
 
 
 def test_rest_api_delegates_to_shared_service() -> None:
@@ -25,3 +26,4 @@ def test_rest_api_delegates_to_shared_service() -> None:
     assert client.post("/record", json={}).json()["procedure_id"] == "p1"
     assert client.get("/audit?tenant_id=demo").json() == {"entries": []}
     assert client.get("/bench/results").json()["method"] == "simulated"
+    assert client.get("/agent/config?tenant_id=demo").json()["version"] == 1

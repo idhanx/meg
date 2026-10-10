@@ -86,6 +86,10 @@ def create_app(service: MegService | None = None) -> FastAPI:
     def bench_results() -> dict[str, Any]:
         return get_service().benchmark()
 
+    @app.get("/agent/config")
+    def active_config(tenant_id: str) -> dict[str, Any]:
+        return get_service().active_config(tenant_id)
+
     return app
 
 

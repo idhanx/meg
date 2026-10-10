@@ -7,6 +7,7 @@ import json
 from pathlib import Path
 
 from meg.db import FalkorStore
+from meg.agent.config_store import ConfigStore
 from meg.governance.audit import audit
 from meg.governance.policy import allowed, policies_for, seed_defaults
 from meg.ingest.merge import RecordResult, record_trace
@@ -88,3 +89,8 @@ class MegService:
 
     def benchmark(self) -> dict[str, Any]:
         return json.loads((Path(__file__).parents[2] / "bench/results/latest.json").read_text())
+
+    def active_config(self, tenant_id: str) -> dict[str, Any]:
+        initialize_tenant(self.store, tenant_id)
+        config = ConfigStore(self.store.graph_for(tenant_id)).active()
+        return {"version": config.version, "body": config.body(), "hash": config.digest()}
