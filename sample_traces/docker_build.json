@@ -1,0 +1,1 @@
+{"tenant_id":"demo","agent":{"id":"agent-a","name":"Agent A","role":"developer"},"task":"Fix Docker build","events":[{"type":"read","path":"Dockerfile"},{"type":"edit","path":"Dockerfile","summary":"pin base image"},{"type":"command","text":"docker build .","exit_code":0}],"outcome":"success"}

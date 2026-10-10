@@ -17,6 +17,14 @@ class RecallRequest(BaseModel):
     task: str
     k: int = Field(default=3, ge=1, le=10)
 
+class PolicyRequest(BaseModel):
+    id: str
+    name: str
+    effect: str
+    action: str
+    agent_role: str
+    max_sensitivity: str
+
 
 def create_app(service: MegService | None = None) -> FastAPI:
     app = FastAPI(title="meg", version="0.1.0")
@@ -68,6 +76,11 @@ def create_app(service: MegService | None = None) -> FastAPI:
     @app.get("/policies")
     def policies(tenant_id: str) -> dict[str, Any]:
         return {"policies": get_service().policies(tenant_id)}
+
+    @app.post("/policies")
+    def create_policy(tenant_id: str, payload: PolicyRequest) -> dict[str, str]:
+        get_service().create_policy(tenant_id, payload.model_dump())
+        return {"status": "created", "id": payload.id}
 
     @app.get("/bench/results")
     def bench_results() -> dict[str, Any]:

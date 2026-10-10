@@ -1,0 +1,1 @@
+{"tenant_id":"demo","agent":{"id":"security-a","name":"Security","role":"security"},"task":"Rotate production secret","sensitivity":"restricted","events":[{"type":"read","path":"infra/secrets.yml"},{"type":"edit","path":"infra/secrets.yml","summary":"rotate key"},{"type":"command","text":"security-check","exit_code":0}],"outcome":"success"}

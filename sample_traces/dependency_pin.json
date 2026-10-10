@@ -1,0 +1,1 @@
+{"tenant_id":"demo","agent":{"id":"agent-a","name":"Agent A","role":"developer"},"task":"Pin incompatible dependency version","events":[{"type":"read","path":"pyproject.toml"},{"type":"edit","path":"pyproject.toml","summary":"pin version"},{"type":"command","text":"pytest","exit_code":0}],"outcome":"success"}

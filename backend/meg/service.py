@@ -82,5 +82,9 @@ class MegService:
     def policies(self, tenant_id: str) -> list[dict[str, str]]:
         return policies_for(self.store.graph_for(tenant_id))
 
+    def create_policy(self, tenant_id: str, policy: dict[str, str]) -> None:
+        graph = self.store.graph_for(tenant_id)
+        graph.query("MERGE (p:Policy {id:$id}) SET p.name=$name, p.effect=$effect, p.action=$action, p.agent_role=$agent_role, p.max_sensitivity=$max_sensitivity", policy)
+
     def benchmark(self) -> dict[str, Any]:
         return json.loads((Path(__file__).parents[2] / "bench/results/latest.json").read_text())

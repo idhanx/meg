@@ -1,0 +1,1 @@
+{"tenant_id":"demo","agent":{"id":"agent-a","name":"Agent A","role":"developer"},"task":"Fix CI token","events":[{"type":"read","path":".github/workflows/ci.yml"},{"type":"edit","path":".github/workflows/ci.yml","summary":"set TOKEN"},{"type":"command","text":"pytest -x","exit_code":0}],"outcome":"success"}

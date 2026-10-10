@@ -1,0 +1,1 @@
+{"tenant_id":"demo","agent":{"id":"agent-a","name":"Agent A","role":"developer"},"task":"Fix database migration","events":[{"type":"read","path":"migrations/001.sql"},{"type":"edit","path":"migrations/001.sql","summary":"add column default"},{"type":"command","text":"alembic upgrade head","exit_code":0}],"outcome":"success"}
