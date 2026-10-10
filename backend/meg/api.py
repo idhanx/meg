@@ -94,9 +94,25 @@ def create_app(service: MegService | None = None) -> FastAPI:
     def reviews(tenant_id: str) -> dict[str, list]:
         return {"reviews": get_service().reviews(tenant_id)}
 
+    @app.post("/reviews/run")
+    def run_review(tenant_id:str,trace_id:str)->dict[str,list[str]]:
+        return {"review_ids":get_service().run_review(tenant_id,trace_id)}
+
     @app.get("/proposals")
     def proposals(tenant_id: str) -> dict[str, list]:
         return {"proposals": get_service().proposals(tenant_id)}
+
+    @app.post("/proposals/{proposal_id}/approve")
+    def approve(proposal_id:str,tenant_id:str)->dict[str,str]:
+        get_service().proposal_decision(tenant_id,proposal_id,"approved");return {"status":"approved"}
+    @app.post("/proposals/{proposal_id}/reject")
+    def reject(proposal_id:str,tenant_id:str)->dict[str,str]:
+        get_service().proposal_decision(tenant_id,proposal_id,"reject");return {"status":"rejected"}
+    @app.post("/proposals/{proposal_id}/rollback")
+    def rollback(proposal_id:str,tenant_id:str)->dict[str,str]:
+        get_service().proposal_decision(tenant_id,proposal_id,"rolled_back");return {"status":"rolled_back"}
+    @app.get("/lineage/{config_version}")
+    def lineage(config_version:int,tenant_id:str)->dict[str,list]:return {"lineage":get_service().lineage(tenant_id,config_version)}
 
     @app.get("/metrics/loop")
     def loop_metrics(tenant_id: str) -> dict[str, list]:

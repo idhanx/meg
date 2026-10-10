@@ -108,3 +108,12 @@ class MegService:
         return [{"id":x[0],"reviewer_id":x[1],"trace_id":x[2],"scores":json.loads(x[3]),"overall":x[4],"verdict":x[5]} for x in rows]
     def proposals(self,tenant_id:str)->list[dict[str,Any]]:
         return ProposalStore(self.store.graph_for(tenant_id)).list()
+    def run_review(self,tenant_id:str,trace_id:str)->list[str]:
+        return ReviewWorker(self.store.graph_for(tenant_id)).run(trace_id)
+    def proposal_decision(self,tenant_id:str,proposal_id:str,decision:str)->None:
+        from meg.gate.promoter import Promoter
+        promoter=Promoter(self.store.graph_for(tenant_id))
+        if decision=="reject":promoter.reject(proposal_id,"human rejection")
+        else:self.store.graph_for(tenant_id).query("MATCH (p:Proposal {id:$id}) SET p.status=$status",{"id":proposal_id,"status":decision})
+    def lineage(self,tenant_id:str,version:int)->list[dict[str,Any]]:
+        rows=list(getattr(self.store.graph_for(tenant_id).query("MATCH (p:Proposal)-[:YIELDS]->(c:AgentConfig {version:$version}) OPTIONAL MATCH (d:Decision)-[:FOR]->(p) RETURN p.id,p.status,d.gate,d.reason",{"version":version}),"result_set",[]));return [{"proposal_id":r[0],"status":r[1],"gate":r[2],"reason":r[3]} for r in rows]
