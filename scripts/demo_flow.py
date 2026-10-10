@@ -1,0 +1,1 @@
+print("1. Agent A records a CI procedure\n2. Agent B recalls the graph path\n3. UI highlights the procedure\n4. Agent C is denied restricted access; audit records it\n5. Simulated benchmark: 15→6 turns, 24→9 tool calls")

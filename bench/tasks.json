@@ -1,0 +1,1 @@
+[{"group":"exact repeat","task":"Fix CI env var"},{"group":"similar variation","task":"Fix failing Docker build"},{"group":"chained task","task":"Pin dependency then rebuild Docker image"}]
