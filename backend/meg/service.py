@@ -15,6 +15,8 @@ from meg.ingest.parser import parse_trace
 from meg.recall.embed import embed
 from meg.recall.rank import rank
 from meg.recall.search import candidates
+from meg.review.worker import ReviewWorker
+from uuid import uuid4
 from meg.schema import ensure_schema
 
 
@@ -47,6 +49,11 @@ class MegService:
             # FalkorDB stores embeddings as vecf32, enabling the vector index in recall.
             graph.query("MATCH (p:Procedure {id:$id})-[:SOLVES]->(t:Task) SET p.embedding=vecf32($embedding), t.embedding=vecf32($embedding)",
                         {"id": result.procedure_id, "embedding": vector})
+        config_version=ConfigStore(graph).active().version
+        trace_id=str(uuid4())
+        worker=ReviewWorker(graph)
+        worker.store_trace(trace_id,trace.task,trace.outcome.value,[event.model_dump() for event in trace.events],config_version)
+        worker.run(trace_id)
         return result
 
     def recall(self, tenant_id: str, agent_id: str, task: str, k: int = 3) -> list[dict[str, Any]]:
@@ -94,3 +101,7 @@ class MegService:
         initialize_tenant(self.store, tenant_id)
         config = ConfigStore(self.store.graph_for(tenant_id)).active()
         return {"version": config.version, "body": config.body(), "hash": config.digest()}
+
+    def reviews(self,tenant_id:str)->list[dict[str,Any]]:
+        rows=list(getattr(self.store.graph_for(tenant_id).query("MATCH (r:Reviewer)-[:WROTE]->(v:Review)-[:GRADES]->(t:Trace) RETURN v.id,r.id,t.id,v.scores,v.overall,v.verdict ORDER BY v.created_at DESC"),"result_set",[]))
+        return [{"id":x[0],"reviewer_id":x[1],"trace_id":x[2],"scores":json.loads(x[3]),"overall":x[4],"verdict":x[5]} for x in rows]

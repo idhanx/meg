@@ -92,8 +92,7 @@ def create_app(service: MegService | None = None) -> FastAPI:
 
     @app.get("/reviews")
     def reviews(tenant_id: str) -> dict[str, list]:
-        # Review persistence is graph-backed in the worker; empty until traces are reviewed.
-        return {"reviews": []}
+        return {"reviews": get_service().reviews(tenant_id)}
 
     @app.get("/proposals")
     def proposals(tenant_id: str) -> dict[str, list]:
