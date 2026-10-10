@@ -5,7 +5,7 @@ You are building **meg** for the WeMakeDevs x FalkorDB hackathon (Graph Hacks), 
 ## Build status
 
 - [x] M1 Core store
-- [ ] M2 Ingest
+- [x] M2 Ingest
 - [ ] M3 Recall
 - [ ] M4 API + MCP
 - [ ] M5 Governance
