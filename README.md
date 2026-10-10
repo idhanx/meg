@@ -15,3 +15,6 @@ pytest
 
 Each tenant is an isolated FalkorDB graph named `tenant:<tenant_id>`. M1 creates
 the core models, safe tenant selection, and idempotent range/vector indexes.
+
+The included benchmark is explicitly **simulated**: it compares a fixed
+trial-and-error cost model with recalled procedures.

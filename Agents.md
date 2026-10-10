@@ -11,7 +11,7 @@ You are building **meg** for the WeMakeDevs x FalkorDB hackathon (Graph Hacks), 
 - [x] M5 Governance
 - [x] M6 UI
 - [x] M7 Benchmark + demo
-- [ ] M8 Ship
+- [x] M8 Ship
 
 ## 1. What meg is
 
